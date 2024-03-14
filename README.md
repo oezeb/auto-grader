@@ -1,5 +1,7 @@
 # Auto Grader
 
+Auto Grader is an Automatic Assessment System for non-programming subjects. It is a web-based application that allows teachers to create and manage assignments, and students to submit their assignments and view their grades. Auto Grader supports different types of questions including single/multi choice, true/false, and fill in blank. 
+
 ## Getting Started
 
 ### Prerequisites
