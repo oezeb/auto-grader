@@ -12,7 +12,7 @@ const quiz = {
             type: "single",
             question: "What is 1 + 1?",
             options: ["1", "2", "3", "4"],
-            answer: 1,
+            answer: 2,
             grade: 5,
         },
         {
@@ -47,8 +47,8 @@ const quiz = {
         {
             type: "fillInBlank",
             question:
-                "The capital of France is __________ and the capital of Spain is __________.",
-            answer: ["Paris", "Madrid"],
+                "The capital of France is __________, the capital of Spain is __________ and China __________",
+            answer: ["Paris", "Madrid", "Beijing"],
             grade: 5,
         },
     ],
@@ -56,26 +56,26 @@ const quiz = {
 
 const attempt1 = {
     answers: [
-        { answer: 2 }, // 0
+        { answer: 1 }, // 0
         { answer: [2, 3, 5] }, // 5/3 + 5/3 + 5/3 = 5
         { answer: ["Dog"] }, // 0
         { answer: true }, // 0
         { answer: ["Beijing"] }, // 0
-        { answer: ["paris", "madrid"] }, // 5/2+5/2 = 5
+        { answer: ["paris", "Madrid", "beiJing"] }, // 5/3 + 5/3 + 5/3 = 5
     ],
     expectedScore: 10,
 };
 
 const attempt2 = {
     answers: [
-        { answer: 1 }, // 5
+        { answer: 2 }, // 5
         { answer: [2, 4, 5] }, // 5/3 - 5/3 + 5/3 = 5/3
-        { answer: ["Dog", "Cat"] }, // 5
+        { answer: ["dog", "Cat"] }, // 5
         { answer: false }, // 5
         { answer: ["Paris"] }, // 5
-        { answer: ["Madrid", "Beijinh"] }, // 5/2 + 0 = 5/2
+        { answer: ["Madrid", "Paris", "Beijing"] }, // 0 + 0 + 5/3 = 5/3
     ],
-    expectedScore: Math.round((145 * 100) / 6) / 100,
+    expectedScore: Math.round((70 * 100) / 3) / 100,
 };
 
 beforeAll(async () => {
@@ -112,7 +112,6 @@ describe("Quiz Attempt Routes", () => {
         });
         expect(response.status).toBe(201);
         expect(response.body.score).toBe(attempt1.expectedScore);
-        console.log(response.body.score);
 
         response = await request(app).post("/api/quiz-attempt").send({
             quiz: quizId,
