@@ -1,0 +1,95 @@
+{
+    "quiz": {
+        "title": "New Quiz",
+        "questions": [
+            {
+                "type": "single",
+                "question": "What is 1 + 1?",
+                "options": ["1", "2", "3", "4"],
+                "answer": 2,
+                "grade": 5
+            },
+            {
+                "type": "multi",
+                "question": "What are the prime numbers between 1 and 5?",
+                "options": ["1", "2", "3", "4", "5"],
+                "answer": [2, 3, 5],
+                "grade": 5,
+                "gradingType": "rightMinusWrong",
+                "allowNegative": true
+            },
+            {
+                "type": "multi",
+                "question": "Which of the following are mammals?",
+                "options": ["Dog", "Cat", "Fish", "Bird", "Snake"],
+                "answer": ["Dog", "Cat"],
+                "grade": 5,
+                "gradingType": "allOrNothing"
+            },
+            {
+                "type": "trueFalse",
+                "question": "Is the earth flat?",
+                "answer": false,
+                "grade": 5
+            },
+            {
+                "type": "fillInBlank",
+                "question": "The capital of France is __________.",
+                "answer": ["Paris"],
+                "grade": 5
+            },
+            {
+                "type": "fillInBlank",
+                "question": "The capital of France is __________, the capital of Spain is __________ and China __________",
+                "answer": ["Paris", "Madrid", "Beijing"],
+                "grade": 5
+            }
+        ]
+    },
+    "attempt1": {
+        "answers": [
+            {
+                "answer": 1
+            },
+            {
+                "answer": [2, 3, 5]
+            },
+            {
+                "answer": ["Dog"]
+            },
+            {
+                "answer": true
+            },
+            {
+                "answer": ["Beijing"]
+            },
+            {
+                "answer": ["paris", "Madrid", "beiJing"]
+            }
+        ],
+        "expectedScore": 10
+    },
+    "attempt2": {
+        "answers": [
+            {
+                "answer": 2
+            },
+            {
+                "answer": [2, 4, 5]
+            },
+            {
+                "answer": ["dog", "Cat"]
+            },
+            {
+                "answer": false
+            },
+            {
+                "answer": ["Paris"]
+            },
+            {
+                "answer": ["Madrid", "Paris", "Beijing"]
+            }
+        ],
+        "expectedScore": 23.33
+    }
+}

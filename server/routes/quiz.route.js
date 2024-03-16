@@ -1,16 +1,18 @@
 const router = require("express").Router();
 
 const auth = require("../middlewares/auth.middleware");
-
+const { verifyToken } = require("../middlewares/auth.middleware");
 const Quiz = require("../models/quiz.model");
-
-router.use(auth);
 
 // GET /api/quiz
 // Get all quizzes
 router.route("/").get((req, res) => {
     Quiz.find()
-        .then((quizzes) => res.json(quizzes))
+        .then((quizzes) => {
+            verifyToken(req.cookies.token)
+                .then((decoded) => res.json(quizzes))
+                .catch((err) => res.json(quizzes.map((quiz) => quiz.safeQuiz)));
+        })
         .catch((err) => res.status(400).json({ error: err.message }));
 });
 
@@ -18,13 +20,17 @@ router.route("/").get((req, res) => {
 // Get a quiz by ID
 router.route("/:id").get((req, res) => {
     Quiz.findById(req.params.id)
-        .then((quiz) => res.json(quiz))
+        .then((quiz) => {
+            verifyToken(req.cookies.token)
+                .then((decoded) => res.json(quiz))
+                .catch((err) => res.json(quiz.safeQuiz));
+        })
         .catch((err) => res.status(400).json({ error: err.message }));
 });
 
 // POST /api/quiz
 // Create a new quiz
-router.route("/").post((req, res) => {
+router.route("/").post(auth, (req, res) => {
     const newQuiz = new Quiz({ ...req.body, createdBy: req.user._id });
     newQuiz
         .save()
@@ -34,7 +40,7 @@ router.route("/").post((req, res) => {
 
 // PUT /api/quiz/:id
 // Update a quiz by ID
-router.route("/:id").put((req, res) => {
+router.route("/:id").put(auth, (req, res) => {
     Quiz.findByIdAndUpdate(req.params.id, req.body)
         .then(() => res.status(204).json())
         .catch((err) => res.status(400).json({ error: err.message }));
@@ -42,7 +48,7 @@ router.route("/:id").put((req, res) => {
 
 // DELETE /api/quiz/:id
 // Delete a quiz by ID
-router.route("/:id").delete((req, res) => {
+router.route("/:id").delete(auth, (req, res) => {
     Quiz.findByIdAndDelete(req.params.id)
         .then(() => res.status(204).json())
         .catch((err) => res.status(400).json({ error: err.message }));

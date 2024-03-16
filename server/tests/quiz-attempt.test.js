@@ -1,85 +1,35 @@
 const mongoose = require("mongoose");
 const request = require("supertest");
+const bcrypt = require("bcryptjs");
+const fs = require("fs");
 
 const app = require("../app");
 const config = require("../config");
+const User = require("../models/user.model");
 const Quiz = require("../models/quiz.model");
+const QuizAttempt = require("../models/quiz-attempt.model");
 
-const quiz = {
-    title: "New Quiz",
-    questions: [
-        {
-            type: "single",
-            question: "What is 1 + 1?",
-            options: ["1", "2", "3", "4"],
-            answer: 2,
-            grade: 5,
-        },
-        {
-            type: "multi",
-            question: "What are the prime numbers between 1 and 5?",
-            options: ["1", "2", "3", "4", "5"],
-            answer: [2, 3, 5],
-            grade: 5,
-            gradingType: "rightMinusWrong",
-            allowNegative: true,
-        },
-        {
-            type: "multi",
-            question: "Which of the following are mammals?",
-            options: ["Dog", "Cat", "Fish", "Bird", "Snake"],
-            answer: ["Dog", "Cat"],
-            grade: 5,
-            gradingType: "allOrNothing",
-        },
-        {
-            type: "trueFalse",
-            question: "Is the earth flat?",
-            answer: false,
-            grade: 5,
-        },
-        {
-            type: "fillInBlank",
-            question: "The capital of France is __________.",
-            answer: ["Paris"],
-            grade: 5,
-        },
-        {
-            type: "fillInBlank",
-            question:
-                "The capital of France is __________, the capital of Spain is __________ and China __________",
-            answer: ["Paris", "Madrid", "Beijing"],
-            grade: 5,
-        },
-    ],
-};
+const data = JSON.parse(fs.readFileSync("./tests/data.json"));
 
-const attempt1 = {
-    answers: [
-        { answer: 1 }, // 0
-        { answer: [2, 3, 5] }, // 5/3 + 5/3 + 5/3 = 5
-        { answer: ["Dog"] }, // 0
-        { answer: true }, // 0
-        { answer: ["Beijing"] }, // 0
-        { answer: ["paris", "Madrid", "beiJing"] }, // 5/3 + 5/3 + 5/3 = 5
-    ],
-    expectedScore: 10,
-};
-
-const attempt2 = {
-    answers: [
-        { answer: 2 }, // 5
-        { answer: [2, 4, 5] }, // 5/3 - 5/3 + 5/3 = 5/3
-        { answer: ["dog", "Cat"] }, // 5
-        { answer: false }, // 5
-        { answer: ["Paris"] }, // 5
-        { answer: ["Madrid", "Paris", "Beijing"] }, // 0 + 0 + 5/3 = 5/3
-    ],
-    expectedScore: Math.round((70 * 100) / 3) / 100,
-};
-
+var cookies, quiz, quizAttempt;
 beforeAll(async () => {
     await mongoose.connect(config.MONDODB_TEST_URI);
+
+    await new User({
+        username: "test",
+        password: bcrypt.hashSync("test", 10),
+    }).save();
+    response = await request(app).post("/api/auth/login").auth("test", "test");
+    cookies = response.headers["set-cookie"];
+
+    quiz = await new Quiz(data.quiz).save();
+
+    attempt = {
+        quiz: quiz._id,
+        name: "Attempt1",
+        answers: data.attempt1.answers,
+    };
+    quizAttempt = await new QuizAttempt(attempt).save();
 });
 
 afterAll(async () => {
@@ -88,37 +38,82 @@ afterAll(async () => {
 });
 
 describe("Quiz Attempt Routes", () => {
-    var quizId;
-    beforeAll(async () => {
-        let _quiz = new Quiz(quiz);
-        await _quiz.save();
-        quizId = _quiz._id;
-    });
-
-    it("POST /api/quiz-attempt/quiz/:id", async () => {
-        response = await request(app).get(`/api/quiz-attempt/quiz/${quizId}`);
-        expect(response.status).toBe(200);
-        expect(response.body.title).toBe(quiz.title);
-        response.body.questions.forEach((question) => {
-            expect(question.answer).toBeUndefined();
-        });
-    });
-
     it("POST /api/quiz-attempt", async () => {
         response = await request(app).post("/api/quiz-attempt").send({
-            quiz: quizId,
-            name: "Test User",
-            answers: attempt1.answers,
+            quiz: quiz._id,
+            name: "Posted Attempt1",
+            answers: data.attempt1.answers,
         });
         expect(response.status).toBe(201);
-        expect(response.body.score).toBe(attempt1.expectedScore);
+        expect(response.body.score).toBe(data.attempt1.expectedScore);
 
         response = await request(app).post("/api/quiz-attempt").send({
-            quiz: quizId,
-            name: "Test User",
-            answers: attempt2.answers,
+            quiz: quiz._id,
+            name: "Posted Attempt2",
+            answers: data.attempt2.answers,
         });
         expect(response.status).toBe(201);
-        expect(response.body.score).toBe(attempt2.expectedScore);
+        expect(response.body.score).toBe(data.attempt2.expectedScore);
+    });
+
+    it("GET /api/quiz-attempt", async () => {
+        // Unauthenticated
+        response = await request(app).get("/api/quiz-attempt");
+        expect(response.status).toBe(401);
+
+        // Authenticated
+        response = await request(app)
+            .get("/api/quiz-attempt")
+            .set("Cookie", cookies);
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveLength(3);
+    });
+
+    it("GET /api/quiz-attempt/:id", async () => {
+        // Unauthenticated
+        response = await request(app).get(
+            `/api/quiz-attempt/${quizAttempt._id}`
+        );
+        expect(response.status).toBe(401);
+
+        // Authenticated
+        response = await request(app)
+            .get(`/api/quiz-attempt/${quizAttempt._id}`)
+            .set("Cookie", cookies);
+        expect(response.status).toBe(200);
+        expect(response.body.name).toBe(quizAttempt.name);
+    });
+
+    it("PUT /api/quiz-attempt/:id", async () => {
+        // Unauthenticated
+        response = await request(app)
+            .put(`/api/quiz-attempt/${quizAttempt._id}`)
+            .send({ name: "Updated Attempt" });
+        expect(response.status).toBe(401);
+
+        // Authenticated
+        response = await request(app)
+            .put(`/api/quiz-attempt/${quizAttempt._id}`)
+            .send({ name: "Updated Attempt" })
+            .set("Cookie", cookies);
+        expect(response.status).toBe(204);
+        quizAttempt = await QuizAttempt.findById(quizAttempt._id);
+        expect(quizAttempt.name).toBe("Updated Attempt");
+    });
+
+    it("DELETE /api/quiz-attempt/:id", async () => {
+        // Unauthenticated
+        response = await request(app).delete(
+            `/api/quiz-attempt/${quizAttempt._id}`
+        );
+        expect(response.status).toBe(401);
+
+        // Authenticated
+        response = await request(app)
+            .delete(`/api/quiz-attempt/${quizAttempt._id}`)
+            .set("Cookie", cookies);
+        expect(response.status).toBe(204);
+        quizAttempt = await QuizAttempt.findById(quizAttempt._id);
+        expect(quizAttempt).toBeNull();
     });
 });
