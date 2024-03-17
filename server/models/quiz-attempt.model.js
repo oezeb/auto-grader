@@ -2,6 +2,20 @@ const { Schema, model } = require("mongoose");
 
 const grader = require("../grader");
 
+const AnswerSchema = new Schema(
+    {
+        answer: {
+            type: Schema.Types.Mixed,
+            required: true,
+        },
+        question: {
+            type: Schema.Types.ObjectId,
+            required: true,
+        },
+    },
+    { _id: false }
+);
+
 const quizAttemptSchema = new Schema(
     {
         quiz: {
@@ -9,21 +23,11 @@ const quizAttemptSchema = new Schema(
             ref: "Quiz",
             required: true,
         },
-        user_id: {
-            type: String,
-        },
         name: {
             type: String,
             required: true,
         },
-        answers: [
-            {
-                answer: {
-                    type: Schema.Types.Mixed,
-                    required: true,
-                },
-            },
-        ],
+        answers: [{ type: AnswerSchema }],
         score: {
             type: Number,
         },

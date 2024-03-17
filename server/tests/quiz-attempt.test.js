@@ -24,6 +24,11 @@ beforeAll(async () => {
 
     quiz = await new Quiz(data.quiz).save();
 
+    for (let i = 0; i < quiz.questions.length; i++) {
+        data.attempt1.answers[i].question = quiz.questions[i]._id;
+        data.attempt2.answers[i].question = quiz.questions[i]._id;
+    }
+
     attempt = {
         quiz: quiz._id,
         name: "Attempt1",

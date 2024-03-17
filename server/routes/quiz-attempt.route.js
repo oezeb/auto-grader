@@ -7,8 +7,9 @@ const QuizAttempt = require("../models/quiz-attempt.model");
 // GET /api/quiz-attempt
 // Get all quiz attempts
 router.route("/").get(auth, (req, res) => {
-    const { quiz } = req.query;
-    QuizAttempt.find({ quiz })
+    const query = {};
+    if (req.query.quiz) query.quiz = req.query.quiz;
+    QuizAttempt.find(query)
         .then((quizAttempts) => res.json(quizAttempts))
         .catch((err) => res.status(400).json({ error: err.message }));
 });

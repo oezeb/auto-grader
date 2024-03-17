@@ -5,10 +5,12 @@ const grader = async (quizAttempt) => {
 
     const quiz = await Quiz.findById(quizAttempt.quiz);
     let score = 0;
-    for (let i = 0; i < quiz.questions.length; i++) {
-        let correctAnswer = quiz.questions[i].answer;
-        let userAnswer = quizAttempt.answers[i].answer;
-        if (quiz.questions[i].type === "fillInBlank") {
+    for (let answer of quizAttempt.answers) {
+        const question = await quiz.questions.id(answer.question);
+        console.log(answer.question, question);
+        let correctAnswer = question.answer;
+        let userAnswer = answer.answer;
+        if (question.type === "fillInBlank") {
             userAnswer = userAnswer.map(toLower);
             correctAnswer = correctAnswer.map(toLower);
 
@@ -17,26 +19,23 @@ const grader = async (quizAttempt) => {
             for (let j = 0; j < n; j++)
                 if (userAnswer[j] === correctAnswer[j]) correct++;
 
-            score += (correct / correctAnswer.length) * quiz.questions[i].grade;
-        } else if (quiz.questions[i].type === "multi") {
+            score += (correct / correctAnswer.length) * question.grade;
+        } else if (question.type === "multi") {
             userAnswer = userAnswer.map(toLower);
             correctAnswer = new Set(correctAnswer.map(toLower));
             let correct = 0;
             for (let ans of userAnswer) if (correctAnswer.has(ans)) correct++;
 
             let wrong = userAnswer.length - correct;
-            if (quiz.questions[i].gradingType === "allOrNothing") {
+            if (question.gradingType === "allOrNothing") {
+                score += correct === correctAnswer.size ? question.grade : 0;
+            } else if (question.gradingType === "rightMinusWrong") {
                 score +=
-                    correct === correctAnswer.size
-                        ? quiz.questions[i].grade
-                        : 0;
-            } else if (quiz.questions[i].gradingType === "rightMinusWrong") {
-                score +=
-                    (correct / correctAnswer.size) * quiz.questions[i].grade -
-                    (wrong / correctAnswer.size) * quiz.questions[i].grade;
+                    (correct / correctAnswer.size) * question.grade -
+                    (wrong / correctAnswer.size) * question.grade;
             }
         } else if (toLower(correctAnswer) === toLower(userAnswer)) {
-            score += quiz.questions[i].grade;
+            score += question.grade;
         }
     }
 
