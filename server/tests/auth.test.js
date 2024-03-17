@@ -43,6 +43,17 @@ describe("Auth Routes", () => {
         cookies = response.headers["set-cookie"];
     });
 
+    it("GET /api/auth", async () => {
+        // Unauthenticated
+        response = await request(app).get("/api/auth");
+        expect(response.status).toBe(401);
+
+        // Authenticated
+        response = await request(app).get("/api/auth").set("Cookie", cookies);
+        expect(response.status).toBe(200);
+        expect(response.body.username).toBe("test");
+    });
+
     it("POST /api/auth/logout", async () => {
         response = await request(app)
             .post("/api/auth/logout")

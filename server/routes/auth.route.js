@@ -4,6 +4,15 @@ const jwt = require("jsonwebtoken");
 
 const config = require("../config");
 const User = require("../models/user.model");
+const auth = require("../middlewares/auth.middleware");
+
+// GET /api/auth
+// Get the current user
+router.route("/").get(auth, (req, res) => {
+    User.findById(req.user._id)
+        .then((user) => res.json(user))
+        .catch((err) => res.status(400).json({ error: err.message }));
+});
 
 // POST /api/auth/login
 // Login using HTTP Basic Authentication
