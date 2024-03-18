@@ -23,7 +23,7 @@ function AddQuiz() {
         }
     };
 
-    return <AddEditQuiz onSubmit={onSubmit} />;
+    return <AddEditQuiz onSubmit={onSubmit} title="Add Quiz" />;
 }
 
 export default AddQuiz;

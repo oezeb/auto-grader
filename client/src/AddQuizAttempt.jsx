@@ -1,27 +1,22 @@
 import { Button } from "@mui/material";
 import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
-import CardContent from "@mui/material/CardContent";
-import Checkbox from "@mui/material/Checkbox";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import FormControl from "@mui/material/FormControl";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import LinearProgress from "@mui/material/LinearProgress";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListSubheader from "@mui/material/ListSubheader";
-import Radio from "@mui/material/Radio";
-import RadioGroup from "@mui/material/RadioGroup";
 import Slide from "@mui/material/Slide";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import * as React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import {
+    FillInBlankQuestions,
+    MultipleChoiceQuestions,
+    SingleChoiceQuestions,
+    TrueFalseQuestions,
+} from "./Quiz";
 import { apiRoutes } from "./util";
 
 function AddQuizAttempt() {
@@ -39,11 +34,16 @@ function AddQuizAttempt() {
         fetch(apiRoutes.quiz + `/${quizId}`)
             .then((res) => res.json())
             .then((quiz) => {
-                quiz.questions.sort((a, b) => {
-                    if (a.type < b.type) return 1;
-                    if (a.type > b.type) return -1;
-                    return 0;
-                });
+                quiz.questions = quiz.questions
+                    .map((question) => {
+                        question.answer = undefined;
+                        return question;
+                    })
+                    .sort((a, b) => {
+                        if (a.type < b.type) return 1;
+                        if (a.type > b.type) return -1;
+                        return 0;
+                    });
                 setQuiz(quiz);
             })
             .catch(() => setQuiz(null));
@@ -106,7 +106,7 @@ function AddQuizAttempt() {
             display="flex"
             flexDirection="column"
             alignItems="center"
-            maxWidth={600}
+            maxWidth={800}
             mx="auto"
             component="form"
             onSubmit={handleSubmit}
@@ -146,191 +146,6 @@ function AddQuizAttempt() {
         </Box>
     );
 }
-
-const TrueFalseQuestions = ({ questions }) =>
-    questions.length && (
-        <List
-            subheader={<ListSubheader>True/False</ListSubheader>}
-            sx={{ width: "100%" }}
-        >
-            {questions.map((question) => (
-                <ListItem key={question._id} disablePadding>
-                    <Card sx={{ width: "100%", my: 1 }} variant="outlined">
-                        <CardContent>
-                            <Typography
-                                sx={{ fontSize: 14 }}
-                                color="text.secondary"
-                                gutterBottom
-                            >
-                                {question.grade} points
-                            </Typography>
-                            <Typography variant="body1">
-                                {question.question}
-                            </Typography>
-                        </CardContent>
-                        <CardActions>
-                            <FormControl>
-                                <RadioGroup row name={question._id}>
-                                    <FormControlLabel
-                                        value={true}
-                                        control={<Radio size="small" />}
-                                        label="True"
-                                    />
-                                    <FormControlLabel
-                                        value={false}
-                                        control={<Radio size="small" />}
-                                        label="False"
-                                    />
-                                </RadioGroup>
-                            </FormControl>
-                        </CardActions>
-                    </Card>
-                </ListItem>
-            ))}
-        </List>
-    );
-
-const SingleChoiceQuestions = ({ questions }) =>
-    questions.length && (
-        <List
-            subheader={<ListSubheader>Single/Multiple Choice</ListSubheader>}
-            sx={{ width: "100%" }}
-        >
-            {questions.map((question) => (
-                <ListItem key={question._id} disablePadding>
-                    <Card sx={{ width: "100%", my: 1 }} variant="outlined">
-                        <CardContent>
-                            <Typography
-                                sx={{ fontSize: 14 }}
-                                color="text.secondary"
-                                gutterBottom
-                            >
-                                {question.grade} points
-                            </Typography>
-                            <Typography variant="body1">
-                                {question.question}
-                            </Typography>
-                        </CardContent>
-                        <CardActions>
-                            <FormControl>
-                                <RadioGroup row name={question._id}>
-                                    <List dense>
-                                        {question.options.map(
-                                            (option, index) => (
-                                                <ListItem key={index}>
-                                                    <FormControlLabel
-                                                        key={option}
-                                                        value={index}
-                                                        control={
-                                                            <Radio size="small" />
-                                                        }
-                                                        label={option}
-                                                    />
-                                                </ListItem>
-                                            )
-                                        )}
-                                    </List>
-                                </RadioGroup>
-                            </FormControl>
-                        </CardActions>
-                    </Card>
-                </ListItem>
-            ))}
-        </List>
-    );
-
-const MultipleChoiceQuestions = ({ questions }) =>
-    questions.length && (
-        <List
-            subheader={<ListSubheader>Multiple Choice</ListSubheader>}
-            sx={{ width: "100%" }}
-        >
-            {questions.map((question) => (
-                <ListItem key={question._id} disablePadding>
-                    <Card sx={{ width: "100%", my: 1 }} variant="outlined">
-                        <CardContent>
-                            <Typography
-                                sx={{ fontSize: 14 }}
-                                color="text.secondary"
-                                gutterBottom
-                            >
-                                {question.grade} points
-                            </Typography>
-                            <Typography variant="body1">
-                                {question.question}
-                            </Typography>
-                        </CardContent>
-                        <CardActions>
-                            <List dense>
-                                {question.options.map((option, index) => (
-                                    <ListItem key={index}>
-                                        <FormControlLabel
-                                            key={option}
-                                            control={<Checkbox size="small" />}
-                                            label={option}
-                                            name={`${question._id}-${index}`}
-                                        />
-                                    </ListItem>
-                                ))}
-                            </List>
-                        </CardActions>
-                    </Card>
-                </ListItem>
-            ))}
-        </List>
-    );
-
-const FillInBlankQuestions = ({ questions }) =>
-    questions.length && (
-        <List
-            subheader={<ListSubheader>Fill in the Blank</ListSubheader>}
-            sx={{ width: "100%" }}
-        >
-            {questions.map((question) => (
-                <ListItem key={question._id} disablePadding>
-                    <Card sx={{ width: "100%", my: 1 }} variant="outlined">
-                        <CardContent>
-                            <Typography
-                                sx={{ fontSize: 14 }}
-                                color="text.secondary"
-                                gutterBottom
-                            >
-                                {question.grade} points
-                            </Typography>
-                            <Box>{replaceBlanks(question)}</Box>
-                        </CardContent>
-                    </Card>
-                </ListItem>
-            ))}
-        </List>
-    );
-
-const replaceBlanks = (question) => {
-    const re = /__+/g;
-    const parts = [];
-    let match;
-    let lastIndex = 0;
-    let i = 0;
-    while ((match = re.exec(question.question))) {
-        parts.push(
-            <Typography variant="body1" component="span" key={lastIndex + 1}>
-                {question.question.slice(lastIndex, match.index)}
-            </Typography>
-        );
-        parts.push(
-            <TextField
-                key={match.index}
-                size="small"
-                variant="standard"
-                name={`${question._id}-${i++}`}
-                sx={{ mx: 1 }}
-            />
-        );
-        lastIndex = match.index + match[0].length;
-    }
-    parts.push(question.question.slice(lastIndex));
-    return parts;
-};
 
 const ScoreDialog = ({ open, score, quiz }) => {
     const navigate = useNavigate();

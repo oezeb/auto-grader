@@ -31,7 +31,9 @@ function EditQuiz() {
     } else if (quiz === null) {
         return <h1>Quiz not found</h1>;
     } else {
-        return <AddEditQuiz quiz={quiz} onSubmit={onSubmit} />;
+        return (
+            <AddEditQuiz quiz={quiz} onSubmit={onSubmit} title="Edit Quiz" />
+        );
     }
 }
 
