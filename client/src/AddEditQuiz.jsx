@@ -37,30 +37,22 @@ function AddEditQuiz({ onSubmit, quiz }) {
         let data = { title };
 
         try {
-            data.questions = questions.map((question, index) => {
-                try {
-                    return fromFormFormat(question);
-                } catch (error) {
-                    throw new Error(`Question #${index + 1}: ${error.message}`);
-                }
-            });
+            data.questions = questions
+                .map((question, index) => {
+                    try {
+                        return fromFormFormat(question);
+                    } catch (error) {
+                        throw new Error(
+                            `Question #${index + 1}: ${error.message}`
+                        );
+                    }
+                })
+                .sort((a, b) =>
+                    a.type === b.type ? 0 : a.type < b.type ? 1 : -1
+                );
 
             if (data.questions.length === 0)
                 throw new Error("At least one question is required");
-
-            // sort questions by question.type
-            data.questions.sort((a, b) => {
-                if (a.type === b.type) return 0;
-                if (a.type === "trueFalse") return -1;
-                if (b.type === "trueFalse") return 1;
-                if (a.type === "single") return -1;
-                if (b.type === "single") return 1;
-                if (a.type === "multi") return -1;
-                if (b.type === "multi") return 1;
-                if (a.type === "fillInBlank") return -1;
-                if (b.type === "fillInBlank") return 1;
-                return 0;
-            });
 
             await onSubmit(data);
         } catch (error) {

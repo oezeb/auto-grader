@@ -43,6 +43,9 @@ const Login = () => {
             flexDirection="column"
             justifyContent="center"
             alignItems="center"
+            width="100%"
+            maxWidth={400}
+            mx="auto"
         >
             <Typography variant="h4" component="h1" gutterBottom>
                 Login

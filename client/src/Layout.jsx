@@ -1,5 +1,6 @@
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import LogoutIcon from "@mui/icons-material/Logout";
+import PersonIcon from "@mui/icons-material/Person";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -35,14 +36,24 @@ function Layout() {
         </Button>
     );
 
-    const ProfileButton = () => (
-        <Button
-            onClick={() => logout().then(() => navigate("/login"))}
-            startIcon={<LogoutIcon />}
-        >
-            Logout
-        </Button>
-    );
+    const ProfileButton = () => {
+        if (user) {
+            return (
+                <Button
+                    onClick={() => logout().then(() => navigate("/login"))}
+                    startIcon={<LogoutIcon />}
+                >
+                    Logout
+                </Button>
+            );
+        } else {
+            return (
+                <Button component={Link} to="/login" startIcon={<PersonIcon />}>
+                    Login
+                </Button>
+            );
+        }
+    };
 
     return (
         <Box width="100vw" height="100vh">
