@@ -22,7 +22,12 @@ beforeAll(async () => {
     response = await request(app).post("/api/auth/login").auth("test", "test");
     cookies = response.headers["set-cookie"];
 
-    quiz = await new Quiz(data.quiz).save();
+    data.quiz.questions = await Promise.all(
+        data.quiz.questions.map(async (question) => {
+            return await new Quiz.Question(question).save();
+        })
+    );
+    quiz = await new Quiz({ ...data.quiz, totalGrade: 0 }).save();
 
     for (let i = 0; i < quiz.questions.length; i++) {
         data.attempt1.answers[i].question = quiz.questions[i]._id;
@@ -34,7 +39,7 @@ beforeAll(async () => {
         name: "Attempt1",
         answers: data.attempt1.answers,
     };
-    quizAttempt = await new QuizAttempt(attempt).save();
+    quizAttempt = await new QuizAttempt({ ...attempt, score: 0 }).save();
 });
 
 afterAll(async () => {
@@ -86,24 +91,29 @@ describe("Quiz Attempt Routes", () => {
             .get(`/api/quiz-attempt/${quizAttempt._id}`)
             .set("Cookie", cookies);
         expect(response.status).toBe(200);
-        expect(response.body.name).toBe(quizAttempt.name);
+        expect(response.body._id).toBe(`${quizAttempt._id}`);
+        response.body.quiz.questions.forEach((question, i) => {
+            expect(question._id).toBe(`${quiz.questions[i]._id}`);
+        });
     });
 
     it("PUT /api/quiz-attempt/:id", async () => {
         // Unauthenticated
         response = await request(app)
             .put(`/api/quiz-attempt/${quizAttempt._id}`)
-            .send({ name: "Updated Attempt" });
+            .send({ name: "Updated Attempt", answers: [] });
         expect(response.status).toBe(401);
 
         // Authenticated
         response = await request(app)
             .put(`/api/quiz-attempt/${quizAttempt._id}`)
-            .send({ name: "Updated Attempt" })
+            .send({ name: "Updated Attempt", answers: [] })
             .set("Cookie", cookies);
         expect(response.status).toBe(204);
         quizAttempt = await QuizAttempt.findById(quizAttempt._id);
         expect(quizAttempt.name).toBe("Updated Attempt");
+        expect(quizAttempt.answers).toHaveLength(0);
+        expect(quizAttempt.score).toBe(0);
     });
 
     it("DELETE /api/quiz-attempt/:id", async () => {

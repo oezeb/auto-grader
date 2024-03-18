@@ -1,7 +1,5 @@
 const { Schema, model } = require("mongoose");
 
-const grader = require("../grader");
-
 const AnswerSchema = new Schema(
     {
         answer: {
@@ -31,14 +29,18 @@ const quizAttemptSchema = new Schema(
         answers: [{ type: AnswerSchema }],
         score: {
             type: Number,
+            required: true,
         },
     },
     { timestamps: true }
 );
 
-quizAttemptSchema.pre("save", async function (next) {
-    this.score = await grader(this);
-    next();
+quizAttemptSchema.pre("find", function () {
+    this.populate("quiz");
+});
+
+quizAttemptSchema.pre("findOne", function () {
+    this.populate("quiz");
 });
 
 module.exports = model("QuizAttempt", quizAttemptSchema);

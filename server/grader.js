@@ -1,13 +1,11 @@
-const Quiz = require("./models/quiz.model");
+const { Question } = require("./models/quiz.model");
 
-const grader = async (quizAttempt) => {
+const grader = async (answers) => {
     const toLower = (v) => `${v}`.toLowerCase().trim();
 
-    const quiz = await Quiz.findById(quizAttempt.quiz);
     let score = 0;
-    for (let answer of quizAttempt.answers) {
-        const question = await quiz.questions.id(answer.question);
-        console.log(answer.question, question);
+    for (let answer of answers) {
+        const question = await Question.findById(answer.question);
         let correctAnswer = question.answer;
         let userAnswer = answer.answer;
         if (question.type === "fillInBlank") {

@@ -1,5 +1,6 @@
 const router = require("express").Router();
 
+const grader = require("../grader");
 const auth = require("../middlewares/auth.middleware");
 const Quiz = require("../models/quiz.model");
 const QuizAttempt = require("../models/quiz-attempt.model");
@@ -24,8 +25,9 @@ router.route("/:id").get(auth, (req, res) => {
 
 // POST /api/quiz-attempt
 // Create a new quiz attempt
-router.route("/").post((req, res) => {
-    const newQuizAttempt = new QuizAttempt(req.body);
+router.route("/").post(async (req, res) => {
+    score = await grader(req.body.answers);
+    const newQuizAttempt = new QuizAttempt({ ...req.body, score });
     newQuizAttempt
         .save()
         .then(() => res.status(201).json(newQuizAttempt))
@@ -34,8 +36,9 @@ router.route("/").post((req, res) => {
 
 // PUT /api/quiz-attempt/:id
 // Update a quiz attempt by ID
-router.route("/:id").put(auth, (req, res) => {
-    QuizAttempt.findByIdAndUpdate(req.params.id, req.body)
+router.route("/:id").put(auth, async (req, res) => {
+    score = await grader(req.body.answers);
+    QuizAttempt.findByIdAndUpdate(req.params.id, { ...req.body, score })
         .then(() => res.status(204).json())
         .catch((err) => res.status(400).json({ error: err.message }));
 });
