@@ -10,6 +10,7 @@ const AnswerSchema = new Schema(
         },
         question: {
             type: Schema.Types.ObjectId,
+            ref: "Question",
             required: true,
         },
     },

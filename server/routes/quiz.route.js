@@ -31,18 +31,58 @@ router.route("/:id").get((req, res) => {
 // POST /api/quiz
 // Create a new quiz
 router.route("/").post(auth, (req, res) => {
-    const newQuiz = new Quiz({ ...req.body, createdBy: req.user._id });
-    newQuiz
-        .save()
-        .then(() => res.status(201).json(newQuiz))
+    const { questions, ...quiz } = req.body;
+    const newQuestions = questions?.map((question) =>
+        Quiz.Question.findByIdAndUpdate(question._id, question, {
+            new: true,
+            upsert: true,
+        })
+    );
+
+    Promise.all(newQuestions || [])
+        .then((questions) => {
+            const questionIds = questions.map((question) => question._id);
+            const totalGrade = questions.reduce(
+                (acc, question) => acc + question.grade,
+                0
+            );
+
+            return new Quiz({
+                ...quiz,
+                questions: questionIds,
+                totalGrade,
+            }).save();
+        })
+        .then((newQuiz) => res.status(201).json(newQuiz))
         .catch((err) => res.status(400).json({ error: err.message }));
 });
 
 // PUT /api/quiz/:id
 // Update a quiz by ID
 router.route("/:id").put(auth, (req, res) => {
-    Quiz.findByIdAndUpdate(req.params.id, req.body)
-        .then(() => res.status(204).json())
+    const { questions, ...quiz } = req.body;
+    const newQuestions = questions?.map((question) =>
+        Quiz.Question.findByIdAndUpdate(question._id, question, {
+            new: true,
+            upsert: true,
+        })
+    );
+
+    Promise.all(newQuestions || [])
+        .then((questions) => {
+            const questionIds = questions.map((question) => question._id);
+            const totalGrade = questions.reduce(
+                (acc, question) => acc + question.grade,
+                0
+            );
+
+            return Quiz.findByIdAndUpdate(
+                req.params.id,
+                { ...quiz, questions: questionIds, totalGrade },
+                { new: true }
+            );
+        })
+        .then((updatedQuiz) => res.status(204).json(updatedQuiz))
         .catch((err) => res.status(400).json({ error: err.message }));
 });
 

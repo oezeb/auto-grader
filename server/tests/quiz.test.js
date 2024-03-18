@@ -21,7 +21,12 @@ beforeAll(async () => {
     response = await request(app).post("/api/auth/login").auth("test", "test");
     cookies = response.headers["set-cookie"];
 
-    quiz = await new Quiz(data.quiz).save();
+    data.quiz.questions = await Promise.all(
+        data.quiz.questions.map(async (question) => {
+            return await new Quiz.Question(question).save();
+        })
+    );
+    quiz = await new Quiz({ ...data.quiz, totalGrade: 0 }).save();
 });
 
 afterAll(async () => {
@@ -30,17 +35,28 @@ afterAll(async () => {
 });
 
 describe("Quiz Routes", () => {
+    beforeAll(async () => {
+        data.quiz.questions[0] = {
+            type: "single",
+            question: "What is the capital of France?",
+            options: ["Paris", "London", "Berlin", "Rome"],
+            answer: "Paris",
+            grade: 5,
+        };
+        data.quiz.questions[1]._id = "fakeid";
+    });
+
     it("POST /api/quiz", async () => {
         // Unauthenticated
         response = await request(app)
             .post("/api/quiz")
-            .send({ title: "Posted Quiz" });
+            .send({ title: "Posted Quiz", questions: data.quiz.questions });
         expect(response.status).toBe(401);
 
         // Authenticated
         response = await request(app)
             .post("/api/quiz")
-            .send({ title: "Posted Quiz" })
+            .send({ title: "Posted Quiz", questions: data.quiz.questions })
             .set("Cookie", cookies);
         expect(response.status).toBe(201);
         expect(response.body.title).toBe("Posted Quiz");
@@ -78,19 +94,31 @@ describe("Quiz Routes", () => {
             .set("Cookie", cookies);
         expect(response.status).toBe(200);
         expect(response.body.title).toBe(quiz.title);
+        response.body.questions.forEach((question) =>
+            expect(question.answer).toBeDefined()
+        );
     });
 
     it("PUT /api/quiz/:id", async () => {
+        let questions = [...data.quiz.questions];
+        questions[0] = {
+            type: "single",
+            question: "What is the capital of France?",
+            options: ["Paris", "London", "Berlin", "Rome"],
+            answer: "Paris",
+            grade: 5,
+        };
+
         // Unauthenticated
         response = await request(app)
             .put(`/api/quiz/${quiz._id}`)
-            .send({ title: "Updated Quiz" });
+            .send({ title: "Updated Quiz", questions });
         expect(response.status).toBe(401);
 
         // Authenticated
         response = await request(app)
             .put(`/api/quiz/${quiz._id}`)
-            .send({ title: "Updated Quiz" })
+            .send({ title: "Updated Quiz", questions })
             .set("Cookie", cookies);
         expect(response.status).toBe(204);
         quiz = await Quiz.findById(quiz._id);
