@@ -37,11 +37,10 @@ afterAll(async () => {
 describe("Quiz Routes", () => {
     beforeAll(async () => {
         data.quiz.questions[0] = {
-            type: "single",
-            question: "What is the capital of France?",
-            options: ["Paris", "London", "Berlin", "Rome"],
-            answer: "Paris",
-            grade: 5,
+            question: "Albert Einstein is best known for his theory of ___.",
+            type: "fillInBlank",
+            grade: "5",
+            answer: ["relativity"],
         };
         data.quiz.questions[1]._id = "fakeid";
     });
@@ -59,7 +58,16 @@ describe("Quiz Routes", () => {
             .send({ title: "Posted Quiz", questions: data.quiz.questions })
             .set("Cookie", cookies);
         expect(response.status).toBe(201);
-        expect(response.body.title).toBe("Posted Quiz");
+        quiz = await Quiz.findById(response.body._id);
+        expect(quiz.title).toBe("Posted Quiz");
+        expect(quiz.questions.length).toBe(data.quiz.questions.length);
+        quiz.questions.forEach((question, index) => {
+            expect(question._id).toBeDefined();
+            expect(question._id === null).toBeFalsy();
+            if (data.quiz.questions[index]._id)
+                expect(question._id).toEqual(data.quiz.questions[index]._id);
+            expect(question.question).toBe(data.quiz.questions[index].question);
+        });
     });
 
     it("GET /api/quiz", async () => {
@@ -67,11 +75,12 @@ describe("Quiz Routes", () => {
         response = await request(app).get("/api/quiz");
         expect(response.status).toBe(200);
         expect(response.body).toHaveLength(2);
-        response.body.forEach((quiz) =>
+        response.body.forEach((quiz) => {
+            expect(quiz.questions.length).toBeGreaterThan(0);
             quiz.questions.forEach((question) =>
                 expect(question.answer).toBeUndefined()
-            )
-        );
+            );
+        });
 
         // Authenticated
         response = await request(app).get("/api/quiz").set("Cookie", cookies);
@@ -84,6 +93,7 @@ describe("Quiz Routes", () => {
         response = await request(app).get(`/api/quiz/${quiz._id}`);
         expect(response.status).toBe(200);
         expect(response.body.title).toBe(quiz.title);
+        expect(response.body.questions.length).toBeGreaterThan(0);
         response.body.questions.forEach((question) =>
             expect(question.answer).toBeUndefined()
         );
@@ -94,6 +104,7 @@ describe("Quiz Routes", () => {
             .set("Cookie", cookies);
         expect(response.status).toBe(200);
         expect(response.body.title).toBe(quiz.title);
+        expect(response.body.questions.length).toBeGreaterThan(0);
         response.body.questions.forEach((question) =>
             expect(question.answer).toBeDefined()
         );

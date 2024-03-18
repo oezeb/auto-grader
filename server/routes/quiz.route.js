@@ -32,12 +32,14 @@ router.route("/:id").get((req, res) => {
 // Create a new quiz
 router.route("/").post(auth, (req, res) => {
     const { questions, ...quiz } = req.body;
-    const newQuestions = questions?.map((question) =>
-        Quiz.Question.findByIdAndUpdate(question._id, question, {
-            new: true,
-            upsert: true,
-        })
-    );
+    const newQuestions = questions?.map(async (question) => {
+        const q = await Quiz.Question.findById(question._id);
+        if (q) {
+            return await Quiz.Question.findByIdAndUpdate(q._id, question, {
+                new: true,
+            });
+        } else return await new Quiz.Question(question).save();
+    });
 
     Promise.all(newQuestions || [])
         .then((questions) => {
@@ -61,12 +63,14 @@ router.route("/").post(auth, (req, res) => {
 // Update a quiz by ID
 router.route("/:id").put(auth, (req, res) => {
     const { questions, ...quiz } = req.body;
-    const newQuestions = questions?.map((question) =>
-        Quiz.Question.findByIdAndUpdate(question._id, question, {
-            new: true,
-            upsert: true,
-        })
-    );
+    const newQuestions = questions?.map(async (question) => {
+        q = await Quiz.Question.findById(question._id);
+        if (q) {
+            return await Quiz.Question.findByIdAndUpdate(q._id, question, {
+                new: true,
+            });
+        } else return await new Quiz.Question(question).save();
+    });
 
     Promise.all(newQuestions || [])
         .then((questions) => {
