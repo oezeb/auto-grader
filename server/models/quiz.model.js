@@ -48,6 +48,10 @@ const quizSchema = new Schema(
                 },
             },
         ],
+        totalGrade: {
+            type: Number,
+            default: 0,
+        },
         createdBy: {
             type: Schema.Types.ObjectId,
             ref: "User",
@@ -61,10 +65,30 @@ quizSchema.virtual("safeQuiz").get(function () {
         _id: this._id,
         title: this.title,
         questions: this.questions.map((question) => {
-            const { answer, ...rest } = question;
-            return rest;
+            question.answer = undefined;
+            return question;
         }),
+        questions: this.questions,
     };
+});
+
+quizSchema.pre("save", function (next) {
+    this.totalGrade = this.questions.reduce(
+        (acc, question) => acc + question.grade,
+        0
+    );
+    next();
+});
+
+quizSchema.pre("findOneAndUpdate", function (next) {
+    const { questions } = this.getUpdate();
+    if (questions) {
+        this._update.totalGrade = questions.reduce(
+            (acc, question) => acc + question.grade,
+            0
+        );
+    }
+    next();
 });
 
 module.exports = model("Quiz", quizSchema);
