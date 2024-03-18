@@ -14,12 +14,7 @@ import QuizAttemptList from "./QuizAttemptList";
 const App = () => (
     <Routes>
         <Route path="/login" element={<Login />} />
-        <Route
-            path="/quiz-attempt/add/:quizId"
-            element={<AuthProvider children={<Layout />} />}
-        >
-            <Route index element={<AddQuizAttempt />} />
-        </Route>
+        <Route path="/quiz-attempt/add/:quizId" element={<AddQuizAttempt />} />
         <Route
             path="/"
             element={
