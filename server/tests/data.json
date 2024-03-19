@@ -49,22 +49,28 @@
     "attempt1": {
         "answers": [
             {
-                "answer": 1
+                "answer": 1,
+                "score": 0
             },
             {
-                "answer": [2, 3, 5]
+                "answer": [2, 3, 5],
+                "score": 5
             },
             {
-                "answer": ["Dog"]
+                "answer": ["Dog"],
+                "score": 0
             },
             {
-                "answer": true
+                "answer": true,
+                "score": 0
             },
             {
-                "answer": ["Beijing"]
+                "answer": ["Beijing"],
+                "score": 0
             },
             {
-                "answer": ["paris", "Madrid", "beiJing"]
+                "answer": ["paris", "Madrid", "beiJing"],
+                "score": 5
             }
         ],
         "expectedScore": 10
@@ -72,22 +78,28 @@
     "attempt2": {
         "answers": [
             {
-                "answer": 2
+                "answer": 2,
+                "score": 5
             },
             {
-                "answer": [2, 4, 5]
+                "answer": [2, 4, 5],
+                "score": 1.67
             },
             {
-                "answer": ["dog", "Cat"]
+                "answer": ["dog", "Cat"],
+                "score": 5
             },
             {
-                "answer": false
+                "answer": false,
+                "score": 5
             },
             {
-                "answer": ["Paris"]
+                "answer": ["Paris"],
+                "score": 5
             },
             {
-                "answer": ["Madrid", "Paris", "Beijing"]
+                "answer": ["Madrid", "Paris", "Beijing"],
+                "score": 1.67
             }
         ],
         "expectedScore": 23.33

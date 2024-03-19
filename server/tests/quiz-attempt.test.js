@@ -56,6 +56,9 @@ describe("Quiz Attempt Routes", () => {
         });
         expect(response.status).toBe(201);
         expect(response.body.score).toBe(data.attempt1.expectedScore);
+        response.body.answers.forEach((answer, i) => {
+            expect(answer.score).toBe(data.attempt1.answers[i].score);
+        });
 
         response = await request(app).post("/api/quiz-attempt").send({
             quiz: quiz._id,
@@ -64,6 +67,9 @@ describe("Quiz Attempt Routes", () => {
         });
         expect(response.status).toBe(201);
         expect(response.body.score).toBe(data.attempt2.expectedScore);
+        response.body.answers.forEach((answer, i) => {
+            expect(answer.score).toBe(data.attempt2.answers[i].score);
+        });
     });
 
     it("GET /api/quiz-attempt", async () => {

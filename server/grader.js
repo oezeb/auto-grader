@@ -17,7 +17,7 @@ const grader = async (answers) => {
             for (let j = 0; j < n; j++)
                 if (userAnswer[j] === correctAnswer[j]) correct++;
 
-            score += (correct / correctAnswer.length) * question.grade;
+            answer.score = (correct / correctAnswer.length) * question.grade;
         } else if (question.type === "multi") {
             userAnswer = userAnswer.map(toLower);
             correctAnswer = new Set(correctAnswer.map(toLower));
@@ -26,15 +26,20 @@ const grader = async (answers) => {
 
             let wrong = userAnswer.length - correct;
             if (question.gradingType === "allOrNothing") {
-                score += correct === correctAnswer.size ? question.grade : 0;
+                answer.score =
+                    correct === correctAnswer.size ? question.grade : 0;
             } else if (question.gradingType === "rightMinusWrong") {
-                score +=
+                answer.score =
                     (correct / correctAnswer.size) * question.grade -
                     (wrong / correctAnswer.size) * question.grade;
             }
         } else if (toLower(correctAnswer) === toLower(userAnswer)) {
-            score += question.grade;
+            answer.score = question.grade;
+        } else {
+            answer.score = 0;
         }
+        score += answer.score;
+        answer.score = Math.round(answer.score * 100) / 100;
     }
 
     return Math.round(score * 100) / 100;

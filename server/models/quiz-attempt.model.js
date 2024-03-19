@@ -11,6 +11,10 @@ const AnswerSchema = new Schema(
             ref: "Question",
             required: true,
         },
+        score: {
+            type: Number,
+            required: true,
+        },
     },
     { _id: false }
 );
