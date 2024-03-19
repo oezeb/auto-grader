@@ -1,6 +1,9 @@
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import DoneIcon from "@mui/icons-material/Done";
 import EditIcon from "@mui/icons-material/Edit";
 import PeopleIcon from "@mui/icons-material/People";
+import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
+import { CircularProgress } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
@@ -26,9 +29,7 @@ import { apiRoutes, gradingTypes } from "./util";
 function Quiz() {
     const { id } = useParams();
     const [quiz, setQuiz] = React.useState(undefined);
-
-    const filterQuestions = (type) =>
-        quiz.questions.filter((question) => question.type === type);
+    const [copy, setCopy] = React.useState(undefined);
 
     React.useEffect(() => {
         fetch(apiRoutes.quiz + `/${id}`)
@@ -45,6 +46,31 @@ function Quiz() {
             );
     }, [id]);
 
+    const filterQuestions = (type) =>
+        quiz.questions.filter((question) => question.type === type);
+
+    const onClickCopy = () => {
+        setCopy("");
+        const url = `/quiz-attempt/add/${id}`;
+        navigator.clipboard.writeText(window.location.origin + url).then(
+            () => {
+                setCopy(url);
+                setTimeout(() => setCopy(undefined), 3000);
+            },
+            () => {
+                setCopy(null);
+                setTimeout(() => setCopy(undefined), 3000);
+            }
+        );
+    };
+
+    const CopyButtonIcon = () => {
+        if (copy === null) return <PriorityHighIcon />;
+        if (copy === "") return <CircularProgress size={24} />;
+        if (copy) return <DoneIcon />;
+        return <ContentCopyIcon />;
+    };
+
     if (quiz === undefined) return <LinearProgress />;
     if (quiz === null) return <h1>Quiz not found</h1>;
 
@@ -60,7 +86,7 @@ function Quiz() {
                 {quiz.title}
             </Typography>
             <Typography variant="h6" gutterBottom>
-                Toal Score: {quiz.totalGrade}
+                {quiz.totalGrade} points
             </Typography>
             <ButtonGroup variant="outlined" sx={{ mb: 2 }}>
                 <Button
@@ -71,13 +97,11 @@ function Quiz() {
                     Edit
                 </Button>
                 <Button
-                    startIcon={<ContentCopyIcon />}
-                    onClick={() => {
-                        const url = `/quiz-attempt/add/${id}`;
-                        navigator.clipboard.writeText(
-                            window.location.origin + url
-                        );
-                    }}
+                    color={
+                        copy === null ? "error" : copy ? "success" : "primary"
+                    }
+                    startIcon={<CopyButtonIcon />}
+                    onClick={onClickCopy}
                 >
                     Share
                 </Button>
@@ -109,8 +133,9 @@ function Quiz() {
     );
 }
 
-export const TrueFalseQuestions = ({ questions, disabled }) =>
-    questions.length && (
+export const TrueFalseQuestions = ({ questions, disabled }) => {
+    if (!questions.length) return null;
+    return (
         <List
             subheader={<ListSubheader>True/False</ListSubheader>}
             sx={{ width: "100%" }}
@@ -124,6 +149,8 @@ export const TrueFalseQuestions = ({ questions, disabled }) =>
                                 color="text.secondary"
                                 gutterBottom
                             >
+                                {question.score !== undefined &&
+                                    `${question.score} / `}
                                 {question.grade} points
                             </Typography>
                             <Typography variant="body1">
@@ -155,9 +182,11 @@ export const TrueFalseQuestions = ({ questions, disabled }) =>
             ))}
         </List>
     );
+};
 
-export const SingleChoiceQuestions = ({ questions, disabled }) =>
-    questions.length && (
+export const SingleChoiceQuestions = ({ questions, disabled }) => {
+    if (!questions.length) return null;
+    return (
         <List
             subheader={<ListSubheader>Single/Multiple Choice</ListSubheader>}
             sx={{ width: "100%" }}
@@ -171,6 +200,8 @@ export const SingleChoiceQuestions = ({ questions, disabled }) =>
                                 color="text.secondary"
                                 gutterBottom
                             >
+                                {question.score !== undefined &&
+                                    `${question.score} / `}
                                 {question.grade} points
                             </Typography>
                             <Typography variant="body1">
@@ -208,9 +239,11 @@ export const SingleChoiceQuestions = ({ questions, disabled }) =>
             ))}
         </List>
     );
+};
 
-export const MultipleChoiceQuestions = ({ questions, disabled }) =>
-    questions.length && (
+export const MultipleChoiceQuestions = ({ questions, disabled }) => {
+    if (!questions.length) return null;
+    return (
         <List
             subheader={<ListSubheader>Multiple Choice</ListSubheader>}
             sx={{ width: "100%" }}
@@ -224,6 +257,8 @@ export const MultipleChoiceQuestions = ({ questions, disabled }) =>
                                 color="text.secondary"
                                 gutterBottom
                             >
+                                {question.score !== undefined &&
+                                    `${question.score} / `}
                                 {question.grade} points
                             </Typography>
                             <Typography
@@ -265,9 +300,11 @@ export const MultipleChoiceQuestions = ({ questions, disabled }) =>
             ))}
         </List>
     );
+};
 
-export const FillInBlankQuestions = ({ questions, disabled }) =>
-    questions.length && (
+export const FillInBlankQuestions = ({ questions, disabled }) => {
+    if (!questions.length) return null;
+    return (
         <List
             subheader={<ListSubheader>Fill in the Blank</ListSubheader>}
             sx={{ width: "100%" }}
@@ -281,6 +318,8 @@ export const FillInBlankQuestions = ({ questions, disabled }) =>
                                 color="text.secondary"
                                 gutterBottom
                             >
+                                {question.score !== undefined &&
+                                    `${question.score} / `}
                                 {question.grade} points
                             </Typography>
                             <Box>{replaceBlanks(question, disabled)}</Box>
@@ -290,6 +329,7 @@ export const FillInBlankQuestions = ({ questions, disabled }) =>
             ))}
         </List>
     );
+};
 
 const replaceBlanks = (question, disabled = false) => {
     const re = /__+/g;

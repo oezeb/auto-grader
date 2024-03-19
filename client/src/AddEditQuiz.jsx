@@ -1,17 +1,19 @@
 import AddIcon from "@mui/icons-material/Add";
 import ClearIcon from "@mui/icons-material/Clear";
-import { Button, LinearProgress } from "@mui/material";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import Checkbox from "@mui/material/Checkbox";
+import CircularProgress from "@mui/material/CircularProgress";
 import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormLabel from "@mui/material/FormLabel";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import InputLabel from "@mui/material/InputLabel";
+import LinearProgress from "@mui/material/LinearProgress";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListSubheader from "@mui/material/ListSubheader";
@@ -23,7 +25,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import * as React from "react";
 
-import { gradingTypes, questionTypes } from "./util";
+import { questionTypes } from "./util";
 
 function AddEditQuiz({ onSubmit, quiz, title }) {
     const [questions, setQuestions] = React.useState(undefined);
@@ -182,7 +184,7 @@ function AddEditQuiz({ onSubmit, quiz, title }) {
                 disabled={loading}
                 sx={{ my: 2 }}
             >
-                Submit
+                {loading ? <CircularProgress size={24} /> : "Submit"}
             </Button>
         </Box>
     );

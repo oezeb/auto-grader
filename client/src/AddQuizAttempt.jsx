@@ -1,5 +1,6 @@
-import { Button } from "@mui/material";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
@@ -9,7 +10,7 @@ import Slide from "@mui/material/Slide";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import * as React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 import {
     FillInBlankQuestions,
@@ -140,7 +141,7 @@ function AddQuizAttempt() {
                 disabled={loading}
                 sx={{ my: 2 }}
             >
-                Submit
+                {loading ? <CircularProgress size={24} /> : "Submit"}
             </Button>
             <ScoreDialog open={open} score={score} quiz={quiz} />
         </Box>
@@ -148,7 +149,6 @@ function AddQuizAttempt() {
 }
 
 const ScoreDialog = ({ open, score, quiz }) => {
-    const navigate = useNavigate();
     return (
         <Dialog
             open={open}

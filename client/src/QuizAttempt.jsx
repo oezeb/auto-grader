@@ -24,7 +24,7 @@ function quizAttempt() {
             .then((res) => res.json())
             .then((data) => {
                 data.answers = data.answers.reduce((acc, answer) => {
-                    acc[answer.question] = answer.answer;
+                    acc[answer.question] = answer;
                     return acc;
                 }, {});
 
@@ -37,7 +37,8 @@ function quizAttempt() {
         return <Typography>Quiz Attempt not found</Typography>;
 
     quizAttempt.quiz.questions.forEach((question) => {
-        question.answer = quizAttempt.answers[question._id];
+        question.answer = quizAttempt.answers[question._id].answer;
+        question.score = quizAttempt.answers[question._id].score;
     });
 
     return (
@@ -57,7 +58,7 @@ function quizAttempt() {
                 {quizAttempt.quiz.title}
             </Typography>
             <Typography variant="h6" gutterBottom>
-                Score: {quizAttempt.score} / {quizAttempt.quiz.totalGrade}
+                {quizAttempt.score} / {quizAttempt.quiz.totalGrade} points
             </Typography>
             <Typography variant="h6" gutterBottom>
                 {quizAttempt.name}

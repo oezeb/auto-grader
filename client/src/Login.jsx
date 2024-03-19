@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import LinearProgress from "@mui/material/LinearProgress";
+import CircularProgress from "@mui/material/CircularProgress";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import React from "react";
@@ -81,7 +81,7 @@ const Login = () => {
                     disabled={loading}
                     sx={{ my: 2 }}
                 >
-                    {loading ? <LinearProgress size={24} /> : "Login"}
+                    {loading ? <CircularProgress size={24} /> : "Login"}
                 </Button>
             </Box>
         </Box>

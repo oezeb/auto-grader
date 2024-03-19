@@ -56,7 +56,7 @@ function Layout() {
     };
 
     return (
-        <Box width="100vw" height="100vh">
+        <Box width="100%">
             <AppBar color="default">
                 <Toolbar>
                     {path !== "/" && <BackButton />}
