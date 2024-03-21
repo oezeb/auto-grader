@@ -9,7 +9,7 @@ const questionSchema = new Schema({
     question: {
         type: String,
         required: true,
-        minlength: 10,
+        minlength: 1,
     },
     options: {
         type: [String],
@@ -45,7 +45,7 @@ const quizSchema = new Schema(
             type: String,
             required: true,
             trim: true,
-            minlength: 3,
+            minlength: 1,
         },
         questions: [
             {
