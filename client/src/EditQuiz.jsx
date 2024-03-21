@@ -16,14 +16,19 @@ function EditQuiz() {
             .then((data) => setQuiz(data));
     }, [id]);
 
-    const onSubmit = (data) => {
-        fetch(apiRoutes.quiz + `/${id}`, {
+    const onSubmit = async (data) => {
+        const res = await fetch(apiRoutes.quiz + `/${id}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(data),
-        }).then(() => navigate(`/quiz/${id}`));
+        });
+        if (res.ok) {
+            navigate(`/quiz/${id}`);
+        } else {
+            throw new Error("Failed to update quiz");
+        }
     };
 
     if (quiz === undefined) {
