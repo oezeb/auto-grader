@@ -301,6 +301,7 @@ const TrueFalse = ({ question }) => {
 
 const SingleChoice = ({ question }) => {
     const [options, setOptions] = React.useState(question.options || []);
+    const [focus, setFocus] = React.useState(undefined);
 
     const handleAddOption = () => {
         setOptions((prev) => [...prev, ""]);
@@ -341,6 +342,8 @@ const SingleChoice = ({ question }) => {
                                             value={option}
                                             required
                                             name={`${question._id}-option-${index}`}
+                                            onFocus={() => setFocus(index)}
+                                            autoFocus={focus === index}
                                             onChange={(e) =>
                                                 handleChangeOption(
                                                     index,
@@ -385,6 +388,7 @@ const SingleChoice = ({ question }) => {
 
 const MultiChoice = ({ question }) => {
     const [options, setOptions] = React.useState(question.options || []);
+    const [focus, setFocus] = React.useState(undefined);
     const [gradingType, setGradingType] = React.useState(
         question.gradingType || "allOrNothing"
     );
@@ -429,6 +433,8 @@ const MultiChoice = ({ question }) => {
                                         variant="standard"
                                         value={option}
                                         name={`${question._id}-option-${index}`}
+                                        onFocus={() => setFocus(index)}
+                                        autoFocus={focus === index}
                                         onChange={(e) =>
                                             handleChangeOption(
                                                 index,
@@ -492,7 +498,7 @@ const MultiChoice = ({ question }) => {
                     <RadioGroup
                         row
                         name={`${question._id}-allowNegativeGrade`}
-                        defaultValue={question.allowNegativeGrade}
+                        defaultValue={question.allowNegativeGrade || false}
                     >
                         <FormControlLabel
                             value={true}
