@@ -83,6 +83,15 @@ function QuizAttemptList() {
                             primary={quizAttempt.name}
                             secondary={quizAttempt.updatedAt.toLocaleString()}
                         />
+                        <ListItemText
+                            primary={
+                                quizAttempt.score +
+                                " / " +
+                                quizAttempt.quiz.totalGrade
+                            }
+                            secondary="Score"
+                            sx={{ textAlign: "right" }}
+                        />
                     </ListItem>
                 ))}
             </List>
